@@ -54,7 +54,7 @@ module OpenstackBoshHelper
       YAML_OPTIONS.each do |option|
         yamhash["#{option}".to_sym]=input["#{option}".to_sym]
       end
-      OpenstackBoshHelper::MicroboshDeployer.init(yamhash)
+      OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
       File.open('/tmp/micobosh_deploy_openstack.yml', 'w') do |file| 
         file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
       end
@@ -63,7 +63,7 @@ module OpenstackBoshHelper
 
     desc "Deploy micro bosh with existing deployment manifest and stemcell"
     input (:manifest) { ask ("the manifest path for micro bosh?") }
-    input (:stemcell) { ask ("the stemcell used for micro bosh?") }
+    input (:stemcell) { ask ("the stemcell path used for micro bosh?") }
     def dm
 
     end
