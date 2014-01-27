@@ -1,8 +1,11 @@
+require 'erb'
+
 module OpenstackBoshHelper
   class MicroboshDeployer
     class << self
       CONFIG_OPTIONS = [       
         :allocated_floating_ip,
+        :net_id,
         :identity_server,
         :flavor_name,
         :user_name,
@@ -52,6 +55,12 @@ module OpenstackBoshHelper
              raise "#{option} not set"
           end
         end
+
+        ERB.new(File.read(get_template("micro_bosh.yml.erb"))).result(binding)  
+      end
+
+      def get_template(template)
+        File.expand_path("../../../templates/#{template}", __FILE__)
       end
 
     end

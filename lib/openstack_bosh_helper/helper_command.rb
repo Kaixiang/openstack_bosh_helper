@@ -6,6 +6,7 @@ module OpenstackBoshHelper
 
     YAML_OPTIONS = [       
       :allocated_floating_ip,
+      :net_id,
       :identity_server,
       :flavor_name,
       :user_name,
@@ -40,6 +41,7 @@ module OpenstackBoshHelper
 
     desc "Generate microbosh manifest"
     input (:allocated_floating_ip) { ask ("the floating ip for the microbosh?") }
+    input (:net_id) { ask ("the network id for openstack") }
     input (:identity_server) { ask ("the identity server usr for openstack") }
     input (:flavor_name) { ask ("the flavor name for the instance created") }
     input (:user_name) { ask ("the username to login openstack") }
@@ -53,7 +55,10 @@ module OpenstackBoshHelper
         yamhash["#{option}".to_sym]=input["#{option}".to_sym]
       end
       OpenstackBoshHelper::MicroboshDeployer.init(yamhash)
-      OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml
+      File.open('/tmp/micobosh_deploy_openstack.yml', 'w') do |file| 
+        file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
+      end
+      puts "File generated /tmp/micobosh_deploy_openstack.yml"
     end
 
     desc "Deploy micro bosh with existing deployment manifest and stemcell"

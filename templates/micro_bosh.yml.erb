@@ -1,0 +1,38 @@
+name: microbosh-openstack
+
+logging:
+  level: DEBUG
+
+network:
+  type: dynamic
+  vip: <%= allocated_floating_ip %>
+  cloud_properties:
+    net_id: <%= net_id %>
+
+resources:
+  persistent_disk: 16384
+  cloud_properties:
+    instance_type: <%= flavor_name %>
+
+cloud:
+  plugin: openstack
+  properties:
+    openstack:
+      auth_url: <%= identity_server %>
+      username: <%= user_name %>
+      api_key: <%= user_pass %>
+      tenant: <%= tenant %>
+      default_security_groups: ["ssh", "bosh"]
+      default_key_name: <%= keypair_name %>
+      private_key: <%= keypair_private_path %>
+
+apply_spec:
+  properties:
+    director:
+      max_threads: 3
+    hm:
+      resurrector_enabled: true
+    ntp:
+      - 0.north-america.pool.ntp.org
+      - 1.north-america.pool.ntp.org
+
