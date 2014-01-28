@@ -1,5 +1,5 @@
-require "mothership"
-require "highline/import"
+require 'mothership'
+require 'highline/import'
 require 'fileutils'
 
 

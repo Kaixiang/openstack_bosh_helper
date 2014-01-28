@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 2.9.0"
   spec.add_development_dependency "mothership"
   spec.add_development_dependency "highline"
+  spec.add_development_dependency "fog"
 
 end
