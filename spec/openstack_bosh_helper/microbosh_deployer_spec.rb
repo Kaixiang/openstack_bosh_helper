@@ -49,7 +49,6 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     before :each do
       described_class.clear
       @deployhash = {
-        'manifest' => '/tmp/microbosh_deploy_openstack.yml',
         'stemcell' => '/tmp/stemcell-openstack.tgz'
       }
     end
@@ -62,7 +61,8 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     it "should shell out to bosh deploy given parameters" do
       described_class.addconf(@deployhash)
       File.stub(:exist?) { true }
-      described_class.should_receive(:sh)
+      described_class.should_receive(:sh).with("bosh micro deployment #{OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH}")
+      described_class.should_receive(:sh).with("bosh micro deploy #{@deployhash['stemcell']}")
       described_class.deploy_microbosh
     end
 

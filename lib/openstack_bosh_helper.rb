@@ -1,4 +1,5 @@
 require "openstack_bosh_helper"
+require "openstack_bosh_helper/helper"
 require "openstack_bosh_helper/helper_command"
 require "openstack_bosh_helper/microbosh_deployer"
 require "openstack_bosh_helper/openstack_helper"

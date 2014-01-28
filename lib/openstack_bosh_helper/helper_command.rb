@@ -72,8 +72,12 @@ module OpenstackBoshHelper
     desc "Deploy micro bosh with existing deployment manifest and stemcell"
     input (:stemcell) { ask ("the stemcell path used for micro bosh?") }
     def dm
-
-
+      deployhash={}
+      DEPLOY_OPTIONS.each do |option|
+        deployhash["#{option}".to_sym]=input["#{option}".to_sym]
+      end
+      OpenstackBoshHelper::MicroboshDeployer.addconf(deployhash)
+      OpenstackBoshHelper::MicroboshDeployer.deploy_microbosh
     end
 
   end

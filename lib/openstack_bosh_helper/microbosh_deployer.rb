@@ -1,6 +1,7 @@
 require 'erb'
 
 module OpenstackBoshHelper
+
   class MicroboshDeployer
     DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
 
@@ -68,7 +69,8 @@ module OpenstackBoshHelper
         unless (File.exist?(DEPLOYMENT_PATH) && File.exist?(stemcell))
           raise "deployment or stemcell not found"
         end
-         
+        sh("bosh micro deployment #{DEPLOYMENT_PATH}")
+        sh("bosh micro deploy #{stemcell}")
       end
 
       def get_template(template)
