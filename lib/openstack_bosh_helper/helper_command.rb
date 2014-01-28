@@ -7,7 +7,7 @@ module OpenstackBoshHelper
   class HelperCommand < Mothership
 
     DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
-    YAML_OPTIONS = [       
+    YAML_OPTIONS = [
       :allocated_floating_ip,
       :net_id,
       :identity_server,
@@ -17,11 +17,11 @@ module OpenstackBoshHelper
       :tenant,
       :keypair_name,
       :keypair_private_path,
-    ] 
+    ]
 
-    DEPLOY_OPTIONS = [       
+    DEPLOY_OPTIONS = [
       :stemcell,
-    ] 
+    ]
 
 
     option :help, :desc => "Show command usage", :alias => "-h",
@@ -48,7 +48,7 @@ module OpenstackBoshHelper
     input (:flavor_name) { ask ("the flavor name for the instance created") }
     input (:user_name) { ask ("the username to login openstack") }
     input (:user_pass) { ask ("the password to login openstack") }
-    input (:tenant) { ask ("the project/tenant name for openstack") } 
+    input (:tenant) { ask ("the project/tenant name for openstack") }
     input (:keypair_name) { ask ("keypair name used in openstack") }
     input (:keypair_private_path) { ask ("private keypair local path") }
     def gm
@@ -57,13 +57,13 @@ module OpenstackBoshHelper
         yamhash["#{option}".to_sym]=input["#{option}".to_sym]
       end
       OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
-      
+
       dirname = File.dirname(DEPLOYMENT_PATH)
       unless File.directory?(dirname)
         FileUtils.mkdir_p(dirname)
       end
 
-      File.open(DEPLOYMENT_PATH, 'w') do |file| 
+      File.open(DEPLOYMENT_PATH, 'w') do |file|
         file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
       end
       puts "File generated #{DEPLOYMENT_PATH}"
