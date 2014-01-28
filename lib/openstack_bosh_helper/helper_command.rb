@@ -79,5 +79,11 @@ module OpenstackBoshHelper
       OpenstackBoshHelper::MicroboshDeployer.deploy_microbosh
     end
 
+    desc "Generate keypair to default deployment Path"
+    def genkey
+      OpenstackBoshHelper::MicroboshDeployer.gen_keypair
+      puts "key generated #{File.join(DEPLOYMENT_PATH, 'bosh.key')}"
+    end
+
   end
 end

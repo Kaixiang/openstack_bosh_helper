@@ -73,6 +73,13 @@ module OpenstackBoshHelper
         sh("bosh micro deploy #{stemcell}")
       end
 
+      def gen_keypair
+        if File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key'))
+          raise 'keypair already exist'
+        end
+        sh("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
+      end
+
       def get_template(template)
         File.expand_path("../../../templates/#{template}", __FILE__)
       end

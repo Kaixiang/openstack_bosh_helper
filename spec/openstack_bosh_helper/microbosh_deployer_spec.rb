@@ -75,8 +75,14 @@ describe OpenstackBoshHelper::MicroboshDeployer do
 
   context 'to generate sshkey-pair in deployment_path directory' do
     it "should shell out generate ssh-key to deployment_path" do
-      described_class.should_receive(:sh).with("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh')}")
+      File.stub(:exist?) { false }
+      described_class.should_receive(:sh).with("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
       described_class.gen_keypair
+    end
+
+    it "raise error when the keypair exist" do
+      File.stub(:exist?) { true }
+      expect{ described_class.gen_keypair }.to raise_error
     end
   end
 
