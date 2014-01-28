@@ -3,10 +3,10 @@ require 'erb'
 module OpenstackBoshHelper
 
   class MicroboshDeployer
-    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
+    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/'
 
     class << self
-      CONFIG_OPTIONS = [       
+      CONFIG_OPTIONS = [
         :allocated_floating_ip,
         :net_id,
         :identity_server,
@@ -17,9 +17,9 @@ module OpenstackBoshHelper
         :keypair_name,
         :keypair_private_path,
         :stemcell,
-      ] 
+      ]
 
-      YAML_OPTIONS = [       
+      YAML_OPTIONS = [
         :allocated_floating_ip,
         :identity_server,
         :flavor_name,
@@ -28,14 +28,14 @@ module OpenstackBoshHelper
         :tenant,
         :keypair_name,
         :keypair_private_path,
-      ] 
+      ]
 
-      DEPLOY_OPTIONS = [       
+      DEPLOY_OPTIONS = [
         :stemcell,
-      ] 
+      ]
 
-      CONFIG_OPTIONS.each do |option| 
-        attr_accessor option   
+      CONFIG_OPTIONS.each do |option|
+        attr_accessor option
       end
 
       def clear
@@ -57,7 +57,7 @@ module OpenstackBoshHelper
           end
         end
 
-        ERB.new(File.read(get_template("micro_bosh.yml.erb"))).result(binding)  
+        ERB.new(File.read(get_template("micro_bosh.yml.erb"))).result(binding)
       end
 
       def deploy_microbosh
@@ -66,7 +66,7 @@ module OpenstackBoshHelper
              raise "#{option} not set"
           end
         end
-        unless (File.exist?(DEPLOYMENT_PATH) && File.exist?(stemcell))
+        unless (File.exist?(File.join(DEPLOYMENT_PATH, 'micro_bosh.yml')) && File.exist?(stemcell))
           raise "deployment or stemcell not found"
         end
         sh("bosh micro deployment #{DEPLOYMENT_PATH}")
@@ -78,23 +78,23 @@ module OpenstackBoshHelper
       end
 
       def sh(command, options={})
-        opts = options.dup       
+        opts = options.dup
         # can only yield if we don't raise errors
         opts[:on_error] = :return if opts[:yield] == :on_false
 
-        output = %x{#{command}}  
+        output = %x{#{command}}
           result = Result.new(command, output, $?.exitstatus)
-          if result.failed?        
+          if result.failed?
             unless opts[:on_error] == :return
               raise Error.new(result.exit_status, command, output)
-            end                    
+            end
             yield result if block_given? && opts[:yield] == :on_false
           else
-            yield result if block_given?    
+            yield result if block_given?
           end
           result
-      rescue Errno::ENOENT => e  
-        msg = "command not found: #{command}" 
+      rescue Errno::ENOENT => e
+        msg = "command not found: #{command}"
         raise Error.new(nil, command) unless opts[:on_error] == :return
         result = Result.new(command, msg, -1, true)
         yield result if block_given? && opts[:yield] == :on_false

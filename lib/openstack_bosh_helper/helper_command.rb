@@ -6,7 +6,7 @@ require 'fileutils'
 module OpenstackBoshHelper
   class HelperCommand < Mothership
 
-    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
+    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/'
     YAML_OPTIONS = [
       :allocated_floating_ip,
       :net_id,
@@ -58,15 +58,14 @@ module OpenstackBoshHelper
       end
       OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
 
-      dirname = File.dirname(DEPLOYMENT_PATH)
-      unless File.directory?(dirname)
-        FileUtils.mkdir_p(dirname)
+      unless File.directory?(DEPLOYMENT_PATH)
+        FileUtils.mkdir_p(DEPLOYMENT_PATH)
       end
 
-      File.open(DEPLOYMENT_PATH, 'w') do |file|
+      File.open(File.join(DEPLOYMENT_PATH, 'micro_bosh.yml'), 'w') do |file|
         file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
       end
-      puts "File generated #{DEPLOYMENT_PATH}"
+      puts "File generated #{File.join(DEPLOYMENT_PATH, 'mico_bosh.yml')}"
     end
 
     desc "Deploy micro bosh with existing deployment manifest and stemcell"

@@ -73,4 +73,11 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     end
   end
 
+  context 'to generate sshkey-pair in deployment_path directory' do
+    it "should shell out generate ssh-key to deployment_path" do
+      described_class.should_receive(:sh).with("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh')}")
+      described_class.gen_keypair
+    end
+  end
+
 end
