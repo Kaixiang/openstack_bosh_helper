@@ -75,7 +75,10 @@ module OpenstackBoshHelper
 
       def gen_keypair
         if File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key'))
-          raise 'keypair already exist'
+          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')} already exist"
+        end
+        if File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key.pub'))
+          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')} already exist"
         end
         sh("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
       end

@@ -80,8 +80,21 @@ describe OpenstackBoshHelper::MicroboshDeployer do
       described_class.gen_keypair
     end
 
-    it "raise error when the keypair exist" do
-      File.stub(:exist?) { true }
+    it "raise error when all keypair exist" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      expect{ described_class.gen_keypair }.to raise_error
+    end
+
+    it "raise error when private keypair exist" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
+      expect{ described_class.gen_keypair }.to raise_error
+    end
+
+    it "raise error when pub key exist" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(false)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       expect{ described_class.gen_keypair }.to raise_error
     end
   end
