@@ -84,6 +84,8 @@ module OpenstackBoshHelper
         File.expand_path("../../../templates/#{template}", __FILE__)
       end
 
+      private
+
       def sh(command, options={})
         opts = options.dup
         # can only yield if we don't raise errors
