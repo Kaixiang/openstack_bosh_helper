@@ -1,9 +1,12 @@
 require "mothership"
 require "highline/import"
+require 'fileutils'
+
 
 module OpenstackBoshHelper
   class HelperCommand < Mothership
 
+    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
     YAML_OPTIONS = [       
       :allocated_floating_ip,
       :net_id,
@@ -17,7 +20,6 @@ module OpenstackBoshHelper
     ] 
 
     DEPLOY_OPTIONS = [       
-      :manifest,
       :stemcell,
     ] 
 
@@ -55,16 +57,22 @@ module OpenstackBoshHelper
         yamhash["#{option}".to_sym]=input["#{option}".to_sym]
       end
       OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
-      File.open('/tmp/micobosh_deploy_openstack.yml', 'w') do |file| 
+      
+      dirname = File.dirname(DEPLOYMENT_PATH)
+      unless File.directory?(dirname)
+        FileUtils.mkdir_p(dirname)
+      end
+
+      File.open(DEPLOYMENT_PATH, 'w') do |file| 
         file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
       end
-      puts "File generated /tmp/micobosh_deploy_openstack.yml"
+      puts "File generated #{DEPLOYMENT_PATH}"
     end
 
     desc "Deploy micro bosh with existing deployment manifest and stemcell"
-    input (:manifest) { ask ("the manifest path for micro bosh?") }
     input (:stemcell) { ask ("the stemcell path used for micro bosh?") }
     def dm
+
 
     end
 

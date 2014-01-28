@@ -2,6 +2,8 @@ require 'erb'
 
 module OpenstackBoshHelper
   class MicroboshDeployer
+    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/mico_bosh.yml'
+
     class << self
       CONFIG_OPTIONS = [       
         :allocated_floating_ip,
@@ -13,7 +15,6 @@ module OpenstackBoshHelper
         :tenant,
         :keypair_name,
         :keypair_private_path,
-        :manifest,
         :stemcell,
       ] 
 
@@ -29,7 +30,6 @@ module OpenstackBoshHelper
       ] 
 
       DEPLOY_OPTIONS = [       
-        :manifest,
         :stemcell,
       ] 
 
@@ -65,10 +65,10 @@ module OpenstackBoshHelper
              raise "#{option} not set"
           end
         end
-        puts manifest
-        unless (File.exist?(manifest) && File.exist?(stemcell))
-          raise "manifest or stemcell not found"
+        unless (File.exist?(DEPLOYMENT_PATH) && File.exist?(stemcell))
+          raise "deployment or stemcell not found"
         end
+         
       end
 
       def get_template(template)
