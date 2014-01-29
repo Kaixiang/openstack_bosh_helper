@@ -34,12 +34,12 @@ module OpenstackBoshHelper
         raise "no openstack instance" if @openstack.nil?
         raise "no key_found in #{key_path}" unless File.exist?(key_path)
         public_key = File.read(key_path)
-        response = @openstack.create_key_pair(:name => key_name, :public_key => public_key)
-        puts response.body
+        @openstack.create_key_pair(key_name,  public_key)
       end
 
       def delete_keypair(key_name)
         raise "no openstack instance" if @openstack.nil?
+        @openstack.delete_key_pair(key_name)
       end
 
       private

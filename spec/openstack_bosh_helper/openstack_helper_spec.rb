@@ -39,6 +39,7 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
   end
 
   context 'keypair upload/list/remove lifecycle' do
+    let (:test_key_name) { 'openstack-spec-key-test' }
 
     before :all do
       cmd = %Q(echo -e  'y\n' \| ssh-keygen -t rsa -N '' -f /tmp/openstack-spec-key-test.key)
@@ -52,11 +53,15 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
 
     it 'could list_keys after uploading keypair using upload_key' do
       key_pairs = described_class.list_keypair
-      key_pairs.should_not include("openstack_spec_key_test")
-      key_pairs = described_class.upload_keypair('openstack_spec_key_test', '/tmp/openstack-spec-key-test.key.pub')
-      key_pairs.should include("openstack_spec_key_test")
-      key_pairs = described_class.delete_keypair('openstack-spec-key-test')
-      key_pairs.should_not include("openstack_spec_key_test")
+      key_pairs.should_not include(test_key_name)
+
+      described_class.upload_keypair(test_key_name, '/tmp/openstack-spec-key-test.key.pub')
+      key_pairs = described_class.list_keypair
+      key_pairs.should include(test_key_name)
+
+      described_class.delete_keypair(test_key_name)
+      key_pairs = described_class.list_keypair
+      key_pairs.should_not include(test_key_name)
     end
 
     it 'should raise error when uploading key with none exist key-pair' do
