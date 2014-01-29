@@ -5,25 +5,6 @@ require 'fileutils'
 
 module OpenstackBoshHelper
   class HelperCommand < Mothership
-
-    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/'
-    YAML_OPTIONS = [
-      :allocated_floating_ip,
-      :net_id,
-      :identity_server,
-      :flavor_name,
-      :user_name,
-      :user_pass,
-      :tenant,
-      :keypair_name,
-      :keypair_private_path,
-    ]
-
-    DEPLOY_OPTIONS = [
-      :stemcell,
-    ]
-
-
     option :help, :desc => "Show command usage", :alias => "-h",
       :default => false
 

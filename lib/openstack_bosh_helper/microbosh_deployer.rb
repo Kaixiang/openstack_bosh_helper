@@ -3,37 +3,7 @@ require 'erb'
 module OpenstackBoshHelper
 
   class MicroboshDeployer
-    DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/'
-
     class << self
-      CONFIG_OPTIONS = [
-        :allocated_floating_ip,
-        :net_id,
-        :identity_server,
-        :flavor_name,
-        :user_name,
-        :user_pass,
-        :tenant,
-        :keypair_name,
-        :keypair_private_path,
-        :stemcell,
-      ]
-
-      YAML_OPTIONS = [
-        :allocated_floating_ip,
-        :identity_server,
-        :flavor_name,
-        :user_name,
-        :user_pass,
-        :tenant,
-        :keypair_name,
-        :keypair_private_path,
-      ]
-
-      DEPLOY_OPTIONS = [
-        :stemcell,
-      ]
-
       CONFIG_OPTIONS.each do |option|
         attr_accessor option
       end
@@ -75,17 +45,17 @@ module OpenstackBoshHelper
 
       def gen_keypair
         if File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key'))
-          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')} already exist"
+          raise "keypair #{File.join(DEPLOYMENT_PATH, 'bosh.key')} already exist"
         end
         if File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key.pub'))
-          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')} already exist"
+          raise "keypair #{File.join(DEPLOYMENT_PATH, 'bosh.key.pub')} already exist"
         end
-        sh("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
+        sh("ssh-keygen -t rsa -N \"\" -f #{File.join(DEPLOYMENT_PATH, 'bosh.key')}")
       end
 
       def upload_keypair
         unless File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key.pub'))
-          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')} not exist, generate key first"
+          raise "keypair #{File.join(DEPLOYMENT_PATH, 'bosh.key.pub')} not exist, generate key first"
         end
         raise "no auth provided, generate manifest first" unless auth_provided?
         OpenstackHelper.config(:auth_url => @identity_server, :user_name => @user_name, :passwd => @user_pass, :tenant_name => @tenant)

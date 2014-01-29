@@ -61,7 +61,7 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     it "should shell out to bosh deploy given parameters" do
       described_class.addconf(@deployhash)
       File.stub(:exist?) { true }
-      described_class.should_receive(:sh).with("bosh micro deployment #{OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH}")
+      described_class.should_receive(:sh).with("bosh micro deployment #{OpenstackBoshHelper::DEPLOYMENT_PATH}")
       described_class.should_receive(:sh).with("bosh micro deploy #{@deployhash['stemcell']}")
       described_class.deploy_microbosh
     end
@@ -76,25 +76,25 @@ describe OpenstackBoshHelper::MicroboshDeployer do
   context 'to generate sshkey-pair in deployment_path directory' do
     it "should shell out generate ssh-key to deployment_path" do
       File.stub(:exist?) { false }
-      described_class.should_receive(:sh).with("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
+      described_class.should_receive(:sh).with("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key')}")
       described_class.gen_keypair
     end
 
     it "raise error when all keypair exist" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       expect{ described_class.gen_keypair }.to raise_error
     end
 
     it "raise error when private keypair exist" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
       expect{ described_class.gen_keypair }.to raise_error
     end
 
     it "raise error when pub key exist" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')).and_return(false)
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key')).and_return(false)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       expect{ described_class.gen_keypair }.to raise_error
     end
   end
@@ -113,28 +113,28 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     end
 
     it "raise error when no keypair was in the path" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
       expect{ described_class.upload_keypair }.to raise_error
     end
 
     it "raise error when no openstack auth provided" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       described_class.clear
       expect{ described_class.upload_keypair }.to raise_error
     end
 
     it "raise error when there is bosh keypair exist" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       OpenstackBoshHelper::OpenstackHelper.should_receive(:config)
       OpenstackBoshHelper::OpenstackHelper.should_receive(:list_keypair).and_return(['bosh'])
       expect{ described_class.upload_keypair }.to raise_error
     end
 
     it "leverage to openstack_helper when keypair pub found in the path" do
-      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
       OpenstackBoshHelper::OpenstackHelper.should_receive(:config)
       OpenstackBoshHelper::OpenstackHelper.should_receive(:list_keypair).and_return([])
-      OpenstackBoshHelper::OpenstackHelper.should_receive(:upload_keypair).with('bosh', File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')) 
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:upload_keypair).with('bosh', File.join(OpenstackBoshHelper::DEPLOYMENT_PATH, 'bosh.key.pub')) 
       described_class.upload_keypair
     end
 

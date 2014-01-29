@@ -1,4 +1,35 @@
 module OpenstackBoshHelper
+  DEPLOYMENT_PATH = '/tmp/deployments/microbosh-openstack/'
+  CONFIG_OPTIONS = [
+    :allocated_floating_ip,
+    :net_id,
+    :identity_server,
+    :flavor_name,
+    :user_name,
+    :user_pass,
+    :tenant,
+    :keypair_name,
+    :keypair_private_path,
+    :stemcell,
+  ]
+
+  YAML_OPTIONS = [
+    :allocated_floating_ip,
+    :net_id,
+    :identity_server,
+    :flavor_name,
+    :user_name,
+    :user_pass,
+    :tenant,
+    :keypair_name,
+    :keypair_private_path,
+  ]
+
+  DEPLOY_OPTIONS = [
+    :stemcell,
+  ]
+
+
   class Result
     # command that generated the result
     # @return [String]
