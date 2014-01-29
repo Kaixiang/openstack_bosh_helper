@@ -99,4 +99,45 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     end
   end
 
+  context 'upload keypair with auth provided' do
+
+    before :each do 
+      described_class.clear
+      @openstackhash = {
+        :identity_server => 'https://pivotal-1.openstack.blueboxgrid.com:5001/v2.0',
+        :user_name => 'admin',
+        :user_pass => 'passwd',
+        :tenant => 'project',
+      }
+      described_class.addconf(@openstackhash)
+    end
+
+    it "raise error when no keypair was in the path" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(false)
+      expect{ described_class.upload_keypair }.to raise_error
+    end
+
+    it "raise error when no openstack auth provided" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      described_class.clear
+      expect{ described_class.upload_keypair }.to raise_error
+    end
+
+    it "raise error when there is bosh keypair exist" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:config)
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:list_keypair).and_return(['bosh'])
+      expect{ described_class.upload_keypair }.to raise_error
+    end
+
+    it "leverage to openstack_helper when keypair pub found in the path" do
+      File.stub(:exist?).with(File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')).and_return(true)
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:config)
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:list_keypair).and_return([])
+      OpenstackBoshHelper::OpenstackHelper.should_receive(:upload_keypair).with('bosh', File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')) 
+      described_class.upload_keypair
+    end
+
+  end
+
 end

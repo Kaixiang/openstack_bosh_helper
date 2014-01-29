@@ -83,11 +83,29 @@ module OpenstackBoshHelper
         sh("ssh-keygen -t rsa -N \"\" -f #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key')}")
       end
 
+      def upload_keypair
+        unless File.exist?(File.join(DEPLOYMENT_PATH, 'bosh.key.pub'))
+          raise "keypair #{File.join(OpenstackBoshHelper::MicroboshDeployer::DEPLOYMENT_PATH, 'bosh.key.pub')} not exist, generate key first"
+        end
+        raise "no auth provided, generate manifest first" unless auth_provided?
+        OpenstackHelper.config(:auth_url => @identity_server, :user_name => @user_name, :passwd => @user_pass, :tenant_name => @tenant)
+        if OpenstackHelper.list_keypair.include?('bosh')
+          raise "there was already a key name bosh in openstack server"
+        else
+          OpenstackHelper.upload_keypair('bosh', File.join(DEPLOYMENT_PATH, 'bosh.key.pub'))
+        end
+
+      end
+
       def get_template(template)
         File.expand_path("../../../templates/#{template}", __FILE__)
       end
 
       private
+
+      def auth_provided?
+        @identity_server && @user_name && @user_pass && @tenant
+      end
 
       def sh(command, options={})
         opts = options.dup
