@@ -56,14 +56,22 @@ module OpenstackBoshHelper
       DEPLOY_OPTIONS.each do |option|
         deployhash["#{option}".to_sym]=input["#{option}".to_sym]
       end
-      OpenstackBoshHelper::MicroboshDeployer.addconf(deployhash)
-      OpenstackBoshHelper::MicroboshDeployer.deploy_microbosh
+      begin
+        OpenstackBoshHelper::MicroboshDeployer.addconf(deployhash)
+        OpenstackBoshHelper::MicroboshDeployer.deploy_microbosh
+      rescue StandardError => e
+        puts "Errored during deploy: #{e}"
+      end
     end
 
     desc "Generate keypair to default deployment Path"
     def genkey
-      OpenstackBoshHelper::MicroboshDeployer.gen_keypair
-      puts "key generated #{File.join(DEPLOYMENT_PATH, 'bosh.key')}"
+      begin
+        OpenstackBoshHelper::MicroboshDeployer.gen_keypair
+        puts "key generated #{File.join(DEPLOYMENT_PATH, 'bosh.key')}"
+      rescue StandardError => e
+        puts "Errored during keygen: #{e}"
+      end
     end
 
   end

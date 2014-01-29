@@ -29,7 +29,6 @@ module OpenstackBoshHelper
     :stemcell,
   ]
 
-
   class Result
     # command that generated the result
     # @return [String]
