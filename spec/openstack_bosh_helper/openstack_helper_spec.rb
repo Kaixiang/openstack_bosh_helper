@@ -38,6 +38,27 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
     described_class.config (sys_credential)
   end
 
+  context 'create/list/remove security group lifecycle' do
+    let (:test_sg_name) {'openstack-spec-security_group-test'}
+
+    it 'could list security group after create one, and delete it later on' do
+      sg = described_class.list_seg
+      sg.should_not include(test_sg_name)
+
+      described_class.add_seg(test_sg_name)
+      sg = described_class.list_seg
+      sg.should include(test_sg_name)
+
+      described_class.delete_seg(test_sg_name)
+      sg = described_class.list_seg
+      sg.should_not include(test_sg_name)
+    end
+
+    it 'could add rule to security group base on predefined flavor' do
+    end
+
+  end
+
   context 'keypair upload/list/remove lifecycle' do
     let (:test_key_name) { 'openstack-spec-key-test' }
 
@@ -51,7 +72,7 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
       File.delete('/tmp/openstack-spec-key-test.key.pub')
     end
 
-    it 'could list_keys after uploading keypair using upload_key' do
+    it 'could list_keys after uploading keypair using upload_key and delete uploaded key using delete_keypair' do
       key_pairs = described_class.list_keypair
       key_pairs.should_not include(test_key_name)
 

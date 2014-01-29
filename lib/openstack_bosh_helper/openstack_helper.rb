@@ -1,4 +1,5 @@
 require 'fog'
+require 'pp'
 
 module OpenstackBoshHelper
   class OpenstackHelper
@@ -23,6 +24,7 @@ module OpenstackBoshHelper
         @openstack = Fog::Compute.new(openstack_params)        
       end
 
+      # Keypair operation helpers
       def list_keypair
         raise "no openstack instance" if @openstack.nil?
         response = @openstack.list_key_pairs
@@ -40,6 +42,36 @@ module OpenstackBoshHelper
       def delete_keypair(key_name)
         raise "no openstack instance" if @openstack.nil?
         @openstack.delete_key_pair(key_name)
+      end
+
+      # Security Group operation helpers
+      def list_seg
+        raise "no openstack instance" if @openstack.nil?
+        response = @openstack.list_security_groups
+        keys = parse_hash_response(response.body, 'security_groups')
+        keys.map { |k| k.fetch('name') }
+      end
+
+      def add_seg(seg_name)
+        raise "no openstack instance" if @openstack.nil?
+        @openstack.create_security_group(seg_name, 'security_group created by openstack_bosh_helper')
+      end
+
+      def delete_seg(seg_name)
+        raise "no openstack instance" if @openstack.nil?
+        @openstack.delete_security_group(seg_name_to_id(seg_name))
+      end
+
+      def seg_name_to_id(seg_name)
+        response = @openstack.list_security_groups
+        keys = parse_hash_response(response.body, 'security_groups')
+        key = keys.detect { |k| k.fetch('name').eql?(seg_name) }
+        return key.fetch('id')
+      end
+
+      # prepare security flavor for 
+      def add_seg_rule(flavor)
+
       end
 
       private
