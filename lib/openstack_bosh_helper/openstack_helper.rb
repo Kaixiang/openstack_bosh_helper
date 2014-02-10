@@ -35,6 +35,8 @@ module OpenstackBoshHelper
       def upload_keypair(key_name, key_path)
         raise "no openstack instance" if @openstack.nil?
         raise "no key_found in #{key_path}" unless File.exist?(key_path)
+        pairs = list_keypair
+        raise "keypair #{key_name} already exist" if pairs.include?(key_name)
         public_key = File.read(key_path)
         @openstack.create_key_pair(key_name,  public_key)
       end

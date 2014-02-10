@@ -168,9 +168,24 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
       key_pairs.should_not include(test_key_name)
     end
 
+    it 'raise error when a keypair already exist with same name' do
+      key_pairs = described_class.list_keypair
+      key_pairs.should_not include(test_key_name)
+
+      described_class.upload_keypair(test_key_name, '/tmp/openstack-spec-key-test.key.pub')
+      key_pairs = described_class.list_keypair
+      key_pairs.should include(test_key_name)
+
+      expect { described_class.upload_keypair(test_key_name, '/tmp/somethingnotexist-nonesensestring')}.to raise_error
+
+      described_class.delete_keypair(test_key_name)
+      key_pairs = described_class.list_keypair
+      key_pairs.should_not include(test_key_name)
+    end
+
     it 'should raise error when uploading key with none exist key-pair' do
        File.stub(:exist?).with('/tmp/somethingnotexist-nonesensestring').and_return(false)
-       expect { described_class.upload_keypair('openstack_spec_key_test', '/tmp/somethingnotexist-nonesensestring')}.to raise_error
+       expect { described_class.upload_keypair(test_key_name, '/tmp/somethingnotexist-nonesensestring')}.to raise_error
     end
   end
 end
