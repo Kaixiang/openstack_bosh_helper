@@ -54,6 +54,8 @@ module OpenstackBoshHelper
 
       def add_seg(seg_name)
         raise "no openstack instance" if @openstack.nil?
+        sg = list_seg
+        raise "security group #{seg_name}_already exist" if sg.include?(seg_name)
         @openstack.create_security_group(seg_name, 'security_group created by openstack_bosh_helper')
       end
 

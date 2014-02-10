@@ -66,6 +66,21 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
       sg.should_not include(test_sg_name)
     end
 
+    it 'raise error if the security group already exist' do
+      sg = described_class.list_seg
+      sg.should_not include(test_sg_name)
+
+      described_class.add_seg(test_sg_name)
+      sg = described_class.list_seg
+      sg.should include(test_sg_name)
+
+      expect { described_class.add_seg(test_sg_name)}.to raise_error
+
+      described_class.delete_seg(test_sg_name)
+      sg = described_class.list_seg
+      sg.should_not include(test_sg_name)
+    end
+
     it 'could create/liss the security group rule base on the flavor' do
       sg = described_class.list_seg
       sg.should_not include(test_sg_name)
