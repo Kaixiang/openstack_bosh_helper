@@ -29,6 +29,12 @@ module OpenstackBoshHelper
     :stemcell,
   ]
 
+  # Security group flavor
+  BOSH_FLAVOR = 0x00001
+  SSH_FLAVOR = 0x00002
+  CF_PUB_FLAVOR = 0x00003
+  CF_PRI_FLAVOR = 0x00004
+
   class Result
     # command that generated the result
     # @return [String]

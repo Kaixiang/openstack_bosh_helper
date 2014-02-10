@@ -34,12 +34,24 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
     return credential
   end
 
+  def detect_rule(sg_rule, port, tcp_protocol=true)
+    protocol = (tcp_protocol==true)? 'tcp' : 'udp'
+    sg_rule.detect { |k| 
+      k['from_port']==port and k['to_port']==port and k['ip_protocol']==protocol and k['ip_range']=={"cidr"=>"0.0.0.0/0"}
+    }
+  end
+
   before :all do
     described_class.config (sys_credential)
   end
 
   context 'create/list/remove security group lifecycle' do
     let (:test_sg_name) {'openstack-spec-security_group-test'}
+
+    before :each do 
+      sg = described_class.list_seg
+      described_class.delete_seg(test_sg_name) if sg.include?(test_sg_name)
+    end
 
     it 'could list security group after create one, and delete it later on' do
       sg = described_class.list_seg
@@ -54,7 +66,63 @@ describe OpenstackBoshHelper::OpenstackHelper , openstack_credentials:true do
       sg.should_not include(test_sg_name)
     end
 
-    it 'could add rule to security group base on predefined flavor' do
+    it 'could create/liss the security group rule base on the flavor' do
+      sg = described_class.list_seg
+      sg.should_not include(test_sg_name)
+      described_class.add_seg(test_sg_name)
+
+      # BOSH FLAVOR TEST
+      described_class.add_seg_rule(test_sg_name, OpenstackBoshHelper::BOSH_FLAVOR)
+
+      sg_rule = described_class.get_seg_rule(test_sg_name)
+      checkrule = sg_rule.detect { |k| 
+        k['from_port']==1 and k['to_port']==65535 and k['ip_protocol']=='tcp' and k['ip_range']=={} and k['group']['name']==test_sg_name
+      }
+      checkrule.should_not be_nil
+
+      detect_rule(sg_rule, 53).should_not be_nil
+      detect_rule(sg_rule, 4222).should_not be_nil
+      detect_rule(sg_rule, 6868).should_not be_nil
+      detect_rule(sg_rule, 25250).should_not be_nil
+      detect_rule(sg_rule, 25555).should_not be_nil
+      ### False for UDP protocal
+      detect_rule(sg_rule, 53, false).should_not be_nil
+      detect_rule(sg_rule, 68, false).should_not be_nil
+      described_class.delete_seg(test_sg_name)
+
+      # SSH FLAVOR TEST
+      described_class.add_seg(test_sg_name)
+      described_class.add_seg_rule(test_sg_name, OpenstackBoshHelper::SSH_FLAVOR)
+      sg_rule = described_class.get_seg_rule(test_sg_name)
+      detect_rule(sg_rule, 22).should_not be_nil
+      detect_rule(sg_rule, 68, false).should_not be_nil
+      described_class.delete_seg(test_sg_name)
+
+      # CF PUB FLAVOR TEST
+      described_class.add_seg(test_sg_name)
+      described_class.add_seg_rule(test_sg_name, OpenstackBoshHelper::CF_PUB_FLAVOR)
+      sg_rule = described_class.get_seg_rule(test_sg_name)
+      detect_rule(sg_rule, 22).should_not be_nil
+      detect_rule(sg_rule, 80).should_not be_nil
+      detect_rule(sg_rule, 443).should_not be_nil
+      detect_rule(sg_rule, 68, false).should_not be_nil
+      described_class.delete_seg(test_sg_name)
+
+      # CF PRI FLAVOR TEST
+      described_class.add_seg(test_sg_name)
+      described_class.add_seg_rule(test_sg_name, OpenstackBoshHelper::CF_PRI_FLAVOR)
+
+      sg_rule = described_class.get_seg_rule(test_sg_name)
+      checkrule = sg_rule.detect { |k| 
+        k['from_port']==1 and k['to_port']==65535 and k['ip_protocol']=='tcp' and k['ip_range']=={} and k['group']['name']==test_sg_name
+      }
+
+      checkrule.should_not be_nil
+      sg_rule = described_class.get_seg_rule(test_sg_name)
+      detect_rule(sg_rule, 22).should_not be_nil
+      detect_rule(sg_rule, 68, false).should_not be_nil
+      described_class.delete_seg(test_sg_name)
+
     end
 
   end

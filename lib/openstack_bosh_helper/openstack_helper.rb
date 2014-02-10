@@ -14,14 +14,14 @@ module OpenstackBoshHelper
         @passwd = credential.fetch(:passwd)
 
         openstack_params = {
-          :provider => "openstack",       
+          :provider => "openstack",
           :openstack_auth_url => @auth_url + '/tokens',
           :openstack_username => @user_name,
           :openstack_tenant => @tenant_name,
           :openstack_api_key => @passwd,
           :connection_options  => {}
         }
-        @openstack = Fog::Compute.new(openstack_params)        
+        @openstack = Fog::Compute.new(openstack_params)
       end
 
       # Keypair operation helpers
@@ -63,15 +63,55 @@ module OpenstackBoshHelper
       end
 
       def seg_name_to_id(seg_name)
+        raise "no openstack instance" if @openstack.nil?
         response = @openstack.list_security_groups
         keys = parse_hash_response(response.body, 'security_groups')
         key = keys.detect { |k| k.fetch('name').eql?(seg_name) }
         return key.fetch('id')
       end
 
-      # prepare security flavor for 
-      def add_seg_rule(flavor)
+      def add_ing_rule(seg_id, port, protocol)
+        raise "no openstack instance" if @openstack.nil?
+        response = @openstack.create_security_group_rule(seg_id, protocol, port, port, "0.0.0.0/0")
+      end
 
+      # prepare security flavor for microbosh/cf
+      def add_seg_rule(seg_name, flavor)
+        raise "no openstack instance" if @openstack.nil?
+        seg_id = seg_name_to_id(seg_name)
+
+        case flavor
+        when BOSH_FLAVOR
+          add_ing_rule(seg_id, 53, 'udp')
+          add_ing_rule(seg_id, 68, 'udp')
+          add_ing_rule(seg_id, 53, 'tcp')
+          add_ing_rule(seg_id, 4222, 'tcp')
+          add_ing_rule(seg_id, 6868, 'tcp')
+          add_ing_rule(seg_id, 25250, 'tcp')
+          add_ing_rule(seg_id, 25555, 'tcp')
+          @openstack.create_security_group_rule(seg_id, 'tcp', 1, 65535, "0.0.0.0/0", seg_id)
+        when SSH_FLAVOR
+          add_ing_rule(seg_id, 22, 'tcp')
+          add_ing_rule(seg_id, 68, 'udp')
+        when CF_PUB_FLAVOR
+          add_ing_rule(seg_id, 22, 'tcp')
+          add_ing_rule(seg_id, 80, 'tcp')
+          add_ing_rule(seg_id, 443, 'tcp')
+          add_ing_rule(seg_id, 68, 'udp')
+        when CF_PRI_FLAVOR
+          add_ing_rule(seg_id, 22, 'tcp')
+          add_ing_rule(seg_id, 68, 'udp')
+          @openstack.create_security_group_rule(seg_id, 'tcp', 1, 65535, "0.0.0.0/0", seg_id)
+        else
+          raise "unsupported flavor"
+        end
+      end
+
+      def get_seg_rule(seg_name)
+        raise "no openstack instance" if @openstack.nil?
+        response = @openstack.get_security_group(seg_name_to_id(seg_name))
+        keys = parse_hash_response(response.body, 'security_group')
+        rules = keys.fetch('rules')
       end
 
       private
