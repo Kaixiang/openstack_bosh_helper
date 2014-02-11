@@ -61,8 +61,8 @@ describe OpenstackBoshHelper::MicroboshDeployer do
     it "should shell out to bosh deploy given parameters" do
       described_class.addconf(@deployhash)
       File.stub(:exist?) { true }
-      described_class.should_receive(:sh).with("bosh micro deployment #{OpenstackBoshHelper::DEPLOYMENT_PATH}")
-      described_class.should_receive(:sh).with("bosh micro deploy #{@deployhash['stemcell']}")
+      described_class.should_receive(:system).with("bosh micro deployment #{OpenstackBoshHelper::DEPLOYMENT_PATH}")
+      described_class.should_receive(:system).with("bosh micro deploy #{@deployhash['stemcell']}")
       described_class.deploy_microbosh
     end
 

@@ -59,7 +59,6 @@ module OpenstackBoshHelper
         else
           yamhash["#{option}".to_sym]=input["#{option}".to_sym]
         end
-        
       end
       OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
 
@@ -109,11 +108,9 @@ module OpenstackBoshHelper
     input (:tenant) { hint; ask ("the project/tenant name for openstack") }
     def prep
       begin
-        
         unless File.directory?(DEPLOYMENT_PATH)
           FileUtils.mkdir_p(DEPLOYMENT_PATH)
         end
-
 
         credential={}
         credential[:auth_url] = auth_url(input)

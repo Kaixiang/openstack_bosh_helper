@@ -39,8 +39,8 @@ module OpenstackBoshHelper
         unless (File.exist?(File.join(DEPLOYMENT_PATH, 'micro_bosh.yml')) && File.exist?(stemcell))
           raise "deployment or stemcell not found"
         end
-        sh("bosh micro deployment #{DEPLOYMENT_PATH}")
-        sh("bosh micro deploy #{stemcell}")
+        system("bosh micro deployment #{DEPLOYMENT_PATH}")
+        system("bosh micro deploy #{stemcell}")
       end
 
       def gen_keypair
