@@ -69,7 +69,7 @@ module OpenstackBoshHelper
       File.open(File.join(DEPLOYMENT_PATH, 'micro_bosh.yml'), 'w') do |file|
         file.write(OpenstackBoshHelper::MicroboshDeployer.generate_microbosh_yml)
       end
-      puts "File generated #{File.join(DEPLOYMENT_PATH, 'mico_bosh.yml')}"
+      puts "File generated #{File.join(DEPLOYMENT_PATH, 'micro_bosh.yml')}"
     end
 
     desc "Deploy micro bosh with existing deployment manifest and stemcell"
