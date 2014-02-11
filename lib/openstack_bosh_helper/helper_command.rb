@@ -37,17 +37,29 @@ module OpenstackBoshHelper
     desc "Generate microbosh manifest"
     input (:allocated_floating_ip) { ask ("the floating ip for the microbosh?") }
     input (:net_id) { ask ("the network id for openstack") }
-    input (:identity_server) { ask ("the identity server usr for openstack") }
-    input (:flavor_name) { ask ("the flavor name for the instance created") }
-    input (:user_name) { ask ("the username to login openstack") }
-    input (:user_pass) { ask ("the password to login openstack") }
-    input (:tenant) { ask ("the project/tenant name for openstack") }
-    input (:keypair_name) { ask ("keypair name used in openstack") }
-    input (:keypair_private_path) { ask ("private keypair local path") }
+    input (:identity_server) { hint; ask ("the identity server usr for openstack") }
+    input (:user_name) { hint; ask ("the username to login openstack") }
+    input (:user_pass) { hint; ask ("the password to login openstack") }
+    input (:tenant) { hint; ask ("the project/tenant name for openstack") }
+    input (:flavor_name) { 'm1.large' }
+    input (:keypair_name) { 'bosh' }
+    input (:keypair_private_path) { File.join(DEPLOYMENT_PATH, 'bosh.key') }
     def gm
       yamhash={}
       YAML_OPTIONS.each do |option|
-        yamhash["#{option}".to_sym]=input["#{option}".to_sym]
+        case option
+        when :identity_server
+          yamhash["#{option}".to_sym] = auth_url(input)
+        when :tenant
+          yamhash["#{option}".to_sym] = tenant_name(input)
+        when :user_name
+          yamhash["#{option}".to_sym] = user_name(input)
+        when :user_pass
+          yamhash["#{option}".to_sym] = passwd(input)
+        else
+          yamhash["#{option}".to_sym]=input["#{option}".to_sym]
+        end
+        
       end
       OpenstackBoshHelper::MicroboshDeployer.addconf(yamhash)
 
@@ -91,23 +103,23 @@ module OpenstackBoshHelper
     end
 
     desc "Prepair keypair and security group in openstack"
-    input (:identity_server) { ask ("the identity server usr for openstack") }
-    input (:user_name) { ask ("the username to login openstack") }
-    input (:user_pass) { ask ("the password to login openstack") }
-    input (:tenant) { ask ("the project/tenant name for openstack") }
+    input (:identity_server) { hint; ask ("the identity server usr for openstack") }
+    input (:user_name) { hint; ask ("the username to login openstack") }
+    input (:user_pass) { hint; ask ("the password to login openstack") }
+    input (:tenant) { hint; ask ("the project/tenant name for openstack") }
     def prep
       begin
-        #TODO MORE INPUT SANITY CHECK FOR ALL CMD PARAM INPUT
-        #
+        
         unless File.directory?(DEPLOYMENT_PATH)
           FileUtils.mkdir_p(DEPLOYMENT_PATH)
         end
 
+
         credential={}
-        credential[:auth_url] = 'https://'+input[:identity_server]+':5001/v2.0'
-        credential[:tenant_name] = input[:tenant]
-        credential[:user_name] = input[:user_name]
-        credential[:passwd] = input[:user_pass]
+        credential[:auth_url] = auth_url(input)
+        credential[:tenant_name] = tenant_name(input)
+        credential[:user_name] = user_name(input)
+        credential[:passwd] = passwd(input)
 
         OpenstackBoshHelper::OpenstackHelper.config(credential)
 
@@ -125,6 +137,36 @@ module OpenstackBoshHelper
         puts "Errored during Openstack keypair/sec group Prepare: #{e}"
       end
 
+    end
+
+    private
+
+    def auth_url(input)
+      key = ENV['OS_AUTH_URL']
+      key = 'https://'+input[:identity_server]+':5001/v2.0' unless key
+      key
+    end
+
+    def user_name(input)
+      key = ENV['OS_USERNAME']
+      key = input[:user_name] unless key
+      key
+    end
+
+    def passwd(input)
+      key = ENV['OS_PASSWORD']
+      key = input[:user_pass] unless key
+      key
+    end
+
+    def tenant_name(input)
+      key = ENV['OS_TENANT_NAME']
+      key = input[:tenant] unless key
+      key
+    end
+
+    def hint
+        puts "[HINT] source the openstack rc file to avoid input every time"
     end
 
   end
